@@ -1,0 +1,47 @@
+---
+import Layout from './Layout.astro';
+
+interface Props {
+  frontmatter: {
+    title: string;
+    subtitle?: string;
+    tag?: string;
+    date: Date;
+    hasCharts?: boolean;
+  };
+}
+
+const { frontmatter } = Astro.props;
+
+const dateStr = frontmatter.date.toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<Layout
+  title={`${frontmatter.title} — Chiunhau You`}
+  hasCharts={frontmatter.hasCharts}
+>
+  <main>
+    <div class="container">
+      <header class="post-header">
+        {frontmatter.tag && <p class="post-tag">{frontmatter.tag}</p>}
+        <h1 set:html={frontmatter.title} />
+        {frontmatter.subtitle && (
+          <p class="post-subtitle">{frontmatter.subtitle}</p>
+        )}
+      </header>
+
+      <div class="post-body">
+        <slot />
+      </div>
+
+      <div class="post-footer">
+        <span><a href="/blog">← All writing</a></span>
+        <span>{dateStr}</span>
+      </div>
+    </div>
+  </main>
+</Layout>

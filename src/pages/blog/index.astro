@@ -1,0 +1,40 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog'))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<Layout title="Writing — Chiunhau You">
+  <main>
+    <div class="container">
+      <header class="blog-header">
+        <p class="section-label">Writing</p>
+        <h1>Essays & Notes</h1>
+        <p>Occasional writing on technology, humanities, and ideas.</p>
+      </header>
+
+      <div class="post-list">
+        {posts.map((post, i) => (
+          <a
+            href={`/blog/${post.id}`}
+            class="post-list-item"
+            style={`animation-delay: ${i * 0.08}s`}
+          >
+            <div class="post-list-date">
+              {post.data.date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
+            </div>
+            <div>
+              {post.data.tag && <p class="post-list-tag">{post.data.tag}</p>}
+              <p class="post-list-title">{post.data.title}</p>
+              {post.data.subtitle && (
+                <p class="post-list-subtitle">{post.data.subtitle}</p>
+              )}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </main>
+</Layout>

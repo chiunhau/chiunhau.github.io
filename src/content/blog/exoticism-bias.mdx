@@ -1,0 +1,201 @@
+---
+title: 'The "Exoticism Bias": How 18th-Century Britain Justified Keeping Some Birds in Cages'
+subtitle: A computational analysis of moral framing across 12,897 mentions in the ECCO corpus
+tag: Digital Humanities — Case Study
+date: 2026-04-19
+hasCharts: true
+---
+
+import Chart from '../../components/Chart.astro';
+
+In eighteenth-century Britain, the moral weight of a birdcage depended almost entirely on which bird was inside it.
+
+Confine a **linnet** — a native songbird of the British countryside — and you were, in the eyes of contemporary moralists, committing an act of tyranny: robbing a creature of its natural liberty and corrupting its innocent character. Confine a **canary** — a cheerful yellow import from the Canary Islands — and you were a generous host, offering a vulnerable foreigner shelter, warmth, and steady meals. Same cage. Entirely different moral logic.
+
+This double standard is what literary historian Ingrid Tague calls the **"Exoticism Bias."** Her argument, grounded in close reading, is that eighteenth-century writers systematically applied different ethical frameworks to native and exotic birds in order to resolve a deep cultural contradiction. This project asks whether that pattern holds at scale — across nearly 13,000 textual mentions drawn from the Eighteenth Century Collections Online (ECCO) corpus.
+
+---
+
+## Background: Liberty, Sensibility, and the Problem of the Cage
+
+To understand why the birdcage became a site of moral debate, it helps to understand the era's central tension. British society in the 1700s was simultaneously built on servitude and increasingly preoccupied with liberty. Animals occupied the lowest rung of the "Great Chain of Being," and natural histories of the period were candid about human dominion over them. One text put it to children approvingly:
+
+> "You see how we have tamed and reduced to slavery, several species of animals... Is this not to be king?"
+
+As the century progressed, however, the rising culture of **sensibility** — an emphasis on feeling and compassion for the suffering of others — made such triumphalism harder to sustain. Reformers like Jeremy Bentham argued that the morally relevant question was not whether a creature could reason, but whether it could *suffer*. If animals were capable of suffering, their captivity began to look uncomfortably like the human slavery that British reformers were simultaneously mobilising against.
+
+Writers and moralists needed a way to preserve their fashionable culture of pet-keeping without surrendering their self-image as a people who abhorred tyranny. The solution, Tague argues, was to draw the line geographically.
+
+### The Native Critique: The Theft of Liberty
+
+**Native birds** — linnets, goldfinches, redbreasts — were described through the language of natural rights. These birds were models of "avian domestic bliss": faithful, monogamous, attentive parents. To cage them was to enact a violent rupture — stolen young, grieving parents, a creature made for liberty condemned to a prison. Oliver Goldsmith argued that the music of a captive bird produced no "pleasing sensation" because it was merely the performance of an animal unaware of its own misfortune. Children's literature reinforced the lesson: bird-nesting was cruelty; linnets "were created to enjoy their liberty."
+
+### The Exotic Justification: The Paternalistic Refuge
+
+**Exotic birds** received a very different treatment. The canary, above all, was framed as a "little foreigner" in need of British hospitality. The moralist Sarah Trimmer put it plainly:
+
+> "He never knew what Liberty was, and therefore does not want it; nay, if you should turn him loose, he would starve and die."
+
+The cage became a sanctuary; the keeper, a benefactor. Providing seed and water was not domination — it was care. By sorting birds into those who deserved liberty and those who required protection, the British could maintain both their pet canaries and their moral self-regard.
+
+---
+
+## Method: Classifying Moral Framing at Scale
+
+Tague's argument rests on a compelling selection of texts, but close reading cannot tell us how representative those texts are. The question this project addresses is whether the same pattern is visible across the full breadth of the ECCO corpus — in the thousands of documents that no single reader would encounter.
+
+### Context Extraction
+
+For each mention of "canary" or "linnet" in the corpus, a **20-word window** was extracted around the target term. This radius is wide enough to capture surrounding moral markers — adjectives like "stolen," "miserable," "kind," or "refuge" — while limiting noise from unrelated content on the same page. The resulting dataset contains **12,897 windows** across **5,021 unique documents**.
+
+### LLM-Based Classification
+
+Each context window was passed to `Qwen2.5-32B-Instruct` with a zero-shot prompt asking it to assign one of four labels:
+
+1. **SLAVERY / DEPRIVATION / FREEDOM** — The text focuses on the bird's natural right to be free or the cruelty of its confinement. Key themes: "stolen" liberty, "unfortunate" imprisonment, the "distress" of being caged.
+2. **HOSPITALITY / CARING / REFUGE** — The text justifies the cage as a place of safety. Key themes: providing "food," "drink," or "care," or describing the owner's "kindness" in protecting a "foreign" or "helpless" creature.
+3. **SCIENTIFIC / OBSERVATIONAL** — Neutral scientific description of the bird.
+4. **OTHER** — Unrelated to any of the above, not about actual birds, or too noisy to classify.
+
+The model was instructed to respond with a label number and a brief evidence summary. This classification approach captures moral *framing* rather than mere vocabulary — a critical distinction, since words like "cage" or "free" carry very different weight depending on surrounding context.
+
+---
+
+## Results
+
+### Finding 1: The Exoticism Bias, Quantified
+
+Across the full dataset of 12,897 mentions, the two species show markedly different moral profiles.
+
+<Chart
+  id="chartSpecies"
+  title="Label Distribution by Bird Species"
+  subtitle="Proportion of mentions per classification label — Canary (n=8,006) vs. Linnet (n=4,891)"
+  height={220}
+  config={{
+    type: 'bar',
+    data: {
+      labels: ['Slavery / Deprivation', 'Hospitality / Refuge', 'Scientific', 'Other'],
+      datasets: [
+        { label: 'Canary', data: [0.9, 2.4, 7.7, 89.0], backgroundColor: '#c49a14', borderRadius: 3 },
+        { label: 'Linnet', data: [12.8, 4.1, 26.5, 56.6], backgroundColor: '#4a6b35', borderRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top', labels: { padding: 20, font: { size: 13 } } },
+        tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y}%` } }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(0,0,0,0.07)' }, ticks: { font: { size: 12 } } },
+        y: { grid: { color: 'rgba(0,0,0,0.07)' }, ticks: { callback: (v) => v + '%', font: { size: 12 } }, title: { display: true, text: '% of mentions', font: { size: 12 } } }
+      }
+    }
+  }}
+/>
+
+The linnet attracts Slavery-coded language at **fourteen times the rate** of the canary (12.8% vs. 0.9%). The chart below isolates Label 1 and Label 2 to make this contrast explicit.
+
+<Chart
+  id="chartRatio"
+  title="Moral Label Ratio: Slavery vs. Hospitality"
+  subtitle="Among morally-coded mentions (Labels 1 & 2) only, absolute counts"
+  height={200}
+  config={{
+    type: 'bar',
+    data: {
+      labels: ['Canary', 'Linnet'],
+      datasets: [
+        { label: 'Slavery / Deprivation (L1)', data: [70, 624], backgroundColor: '#8b3a1a', borderRadius: 3 },
+        { label: 'Hospitality / Refuge (L2)', data: [192, 202], backgroundColor: '#2e6b8a', borderRadius: 3 }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { position: 'top', labels: { padding: 20, font: { size: 13 } } },
+        tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.x} mentions` } }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(0,0,0,0.07)' }, ticks: { font: { size: 12 } }, title: { display: true, text: 'Number of mentions', font: { size: 12 } } },
+        y: { grid: { display: false }, ticks: { font: { size: 14 } } }
+      }
+    }
+  }}
+/>
+
+> **Key finding:** For the canary, Hospitality-coded mentions (192) outnumber Slavery-coded ones (70) by nearly **3:1** — the cage is framed as shelter rather than confinement. For the linnet, the ratio inverts: 624 Slavery mentions against 202 Hospitality mentions, more than **3:1** in the opposite direction.
+
+The overall distribution is also worth noting. The canary is treated overwhelmingly as a neutral object — 89% of its mentions fall into the "Other" category, suggesting it functioned more as a commodity or natural history specimen than as a morally charged subject. The linnet, by contrast, appears in a morally inflected context in roughly 17% of mentions, reflecting its deeper embeddedness in the period's sentimental and ethical literature.
+
+### Finding 2: A Diachronic Shift — The 1780s
+
+The temporal distribution of Slavery-coded mentions adds a further dimension to the story.
+
+<Chart
+  id="chartDiachronic"
+  title="Slavery-Coded Mentions Over Time"
+  subtitle="Percentage of all mentions classified as Label 1 (Slavery/Deprivation/Freedom), by decade"
+  height={220}
+  config={{
+    type: 'line',
+    data: {
+      labels: ['1700s','1710s','1720s','1730s','1740s','1750s','1760s','1770s','1780s','1790s'],
+      datasets: [{
+        label: 'Slavery-coded mentions (%)',
+        data: [1.5, 2.5, 2.0, 3.7, 3.0, 5.9, 3.5, 6.0, 10.5, 6.5],
+        borderColor: '#8b3a1a',
+        backgroundColor: 'rgba(139,58,26,0.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: ['#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#8b3a1a','#fff'],
+        pointBorderColor: '#8b3a1a',
+        pointRadius: [5,5,5,5,5,5,5,5,8,5],
+        fill: true,
+        tension: 0.35,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.y}% of mentions` } } },
+      scales: {
+        x: { grid: { color: 'rgba(0,0,0,0.07)' }, ticks: { font: { size: 12 } } },
+        y: { grid: { color: 'rgba(0,0,0,0.07)' }, ticks: { callback: (v) => v + '%', font: { size: 12 } }, title: { display: true, text: '% classified as Slavery/Deprivation', font: { size: 12 } }, min: 0, max: 13 }
+      }
+    }
+  }}
+/>
+
+The 1780s stand out markedly. Slavery-coded mentions nearly double relative to the 1770s, reaching **10.5%** of all mentions for the decade — the highest proportion across the entire century.
+
+| Decade | Total mentions | Slavery mentions | % |
+|--------|---------------:|----------------:|--:|
+| 1700s  | 862  | 13  | 1.5% |
+| 1710s  | 672  | 17  | 2.5% |
+| 1720s  | 637  | 13  | 2.0% |
+| 1730s  | 808  | 30  | 3.7% |
+| 1740s  | 1,210 | 36 | 3.0% |
+| 1750s  | 1,012 | 60 | 5.9% |
+| 1760s  | 1,461 | 51 | 3.5% |
+| 1770s  | 1,654 | 99 | 6.0% |
+| **1780s** | **1,922** | **201** | **10.5% ↑** |
+| 1790s  | 2,659 | 174 | 6.5% |
+
+The timing aligns closely with the peak of the British abolitionist movement: the Society for Effecting the Abolition of the Slave Trade was founded in 1787, Wilberforce began his parliamentary campaign the same year, and the language of liberty and enslavement was saturating public discourse at an intensity it had not previously reached. The data suggest that this rhetorical pressure had consequences beyond the immediate political debate — the vocabulary of slavery, once broadly mobilised, became harder to contain.
+
+---
+
+## Discussion and Limitations
+
+The results broadly support Tague's account of the Exoticism Bias, while extending it in two directions: confirming its presence across a much larger body of texts, and locating its intensification within a specific historical moment. The 1780s spike in particular suggests that the moral logic of bird captivity was not static across the century — it was responsive to political context.
+
+Several limitations deserve acknowledgement. First, the LLM classification has not yet been validated against a manually coded sample; a systematic validation would strengthen confidence in the label distributions. Second, the current dataset covers only two bird species — extending the analysis to parrots would test whether the pattern generalises beyond the canary's specific cultural position as a domesticated pet. Third, duplicate book entries in the corpus have not yet been removed, which may inflate the contribution of a small number of heavily-cited texts.
+
+These are tractable problems. As a first quantitative pass at a question that has previously lived almost entirely in close reading, however, the results are encouraging.
+
+---
+
+## References
+
+Tague, I. H. (2010). Companions, servants, or slaves?: Considering animals in eighteenth-century Britain. *Studies in Eighteenth-Century Culture*, 39(1), 111–130.

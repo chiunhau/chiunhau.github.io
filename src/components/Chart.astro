@@ -1,0 +1,35 @@
+---
+interface Props {
+  id: string;
+  title?: string;
+  subtitle?: string;
+  config: object;
+  height?: number;
+}
+
+const { id, title, subtitle, config, height = 220 } = Astro.props;
+const configJson = JSON.stringify(config);
+---
+
+<div class="chart-wrap">
+  {title && <div class="chart-title">{title}</div>}
+  {subtitle && <div class="chart-subtitle">{subtitle}</div>}
+  <canvas id={id} height={height} data-chart-config={configJson}></canvas>
+</div>
+
+<script>
+  function initCharts() {
+    document.querySelectorAll<HTMLCanvasElement>('canvas[data-chart-config]').forEach((canvas) => {
+      if (canvas.dataset.chartInitialized) return;
+      canvas.dataset.chartInitialized = 'true';
+      // @ts-ignore — Chart is loaded via CDN
+      new Chart(canvas, JSON.parse(canvas.dataset.chartConfig!));
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCharts);
+  } else {
+    initCharts();
+  }
+</script>
